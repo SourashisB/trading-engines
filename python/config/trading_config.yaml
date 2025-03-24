@@ -1,0 +1,118 @@
+# Trading Engine Configuration
+engine_name: "QuantTradingEngine"
+instance_id: "prod001"
+
+# Logging configuration
+log_level: "INFO"
+log_format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+log_file: "logs/trading_engine.log"
+
+# Event processing
+event_queue_size: 100000
+heartbeat_interval_seconds: 5
+
+# Risk limits
+risk_limits:
+  # Position size limits by instrument
+  position_limits:
+    "BTC-USD": 10.0
+    "ETH-USD": 100.0
+    "AAPL": 5000
+    "MSFT": 3000
+    "ES": 50  # E-mini S&P 500 futures
+  
+  # Portfolio level limits
+  max_drawdown_pct: 5.0
+  drawdown_window_days: 1
+  max_daily_loss: 100000
+  max_position_value_pct: 20.0  # No position can be more than 20% of portfolio
+  
+  # Strategy-specific limits
+  strategy_exposure_limits:
+    "momentum_strategy": 500000
+    "mean_reversion": 300000
+    "stat_arb": 750000
+
+# Exchange connections
+exchanges:
+  - name: "Binance"
+    enabled: true
+    api_url: "https://api.binance.com"
+    ws_url: "wss://stream.binance.com:9443/ws"
+    market_data_enabled: true
+    trading_enabled: true
+    rate_limits:
+      orders_per_second: 10
+      queries_per_minute: 1200
+  
+  - name: "Coinbase"
+    enabled: true
+    api_url: "https://api.pro.coinbase.com"
+    ws_url: "wss://ws-feed.pro.coinbase.com"
+    market_data_enabled: true
+    trading_enabled: true
+    rate_limits:
+      orders_per_second: 5
+      queries_per_minute: 300
+
+  - name: "Alpaca"
+    enabled: true
+    api_url: "https://api.alpaca.markets"
+    ws_url: "wss://stream.data.alpaca.markets/v2"
+    market_data_enabled: true
+    trading_enabled: true
+    rate_limits:
+      orders_per_second: 10
+      queries_per_minute: 200
+
+# Trading parameters
+trading_parameters:
+  default_order_type: "LIMIT"
+  default_time_in_force: "GTC"
+  max_order_quantity:
+    "BTC-USD": 5.0
+    "ETH-USD": 50.0
+    default: 1000000  # Default limit for instruments not specified
+  
+  # Slippage model parameters
+  slippage_model:
+    type: "fixed_bps"
+    value: 5  # 5 basis points
+
+  # Transaction cost model
+  transaction_costs:
+    commission_rate: 0.001  # 0.1%
+    minimum_commission: 1.0
+
+# Performance tracking
+performance_tracking:
+  record_trades: true
+  record_orders: true
+  metrics_calculation_interval_seconds: 60
+  pnl_update_threshold_pct: 0.001  # Only update P&L when it changes by more than 0.1%
+
+# Data storage
+data_storage:
+  market_data:
+    enabled: true
+    storage_type: "influxdb"
+    connection_string: "http://localhost:8086"
+    database: "market_data"
+  
+  trades:
+    enabled: true
+    storage_type: "mongodb"
+    connection_string: "mongodb://localhost:27017"
+    database: "trades"
+  
+  orders:
+    enabled: true
+    storage_type: "mongodb"
+    connection_string: "mongodb://localhost:27017"
+    database: "orders"
+
+# Security settings
+security:
+  encryption_enabled: true
+  api_key_encryption_method: "AES-256"
+  api_key_storage: "vault"  # Use HashiCorp Vault for storing API keys
